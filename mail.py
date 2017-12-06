@@ -13,4 +13,4 @@ def get_code():
 	code = ""
 	while(len(code) != 5):
 		code = code + str(randint(1, 9))
-	return code
+	return code	
