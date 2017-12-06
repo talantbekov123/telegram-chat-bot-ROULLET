@@ -6,6 +6,7 @@ def create_tables():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 chat_id INT UNIQUE,
                 verified BOOLEAN,
+                code VARCHAR(50),
                 email VARCHAR(50)
             );''')
 
@@ -39,15 +40,16 @@ def drop_tables():
     conn.close()
 
 
-def find_user(chat_id):
+def get_user(chat_id):
     conn = sqlite3.connect('test.db')
     rows = conn.execute('SELECT * FROM users WHERE chat_id=?', (chat_id,))
     row = rows.fetchone()
     conn.close()
     return row
+
 # if already exists returns false
 def create_user(chat_id, verified, email):
-    res = find_user(chat_id)
+    res = get_user(chat_id)
     conn = sqlite3.connect('test.db')
 
     if(res == None):
@@ -60,11 +62,11 @@ def create_user(chat_id, verified, email):
         return False
 
 # update user, second and third values are change values
-def update_user(chat_id, verified, email):
-    res = find_user(chat_id)
+def update_user(chat_id, verified, email, code):
+    res = get_user(chat_id)
     conn = sqlite3.connect('test.db')
     if(res != None):
-        conn.executemany("UPDATE users SET verified = ?, email = ? WHERE chat_id = ?", [(verified, email, chat_id,),])
+        conn.executemany("UPDATE users SET verified = ?, email = ?, code = ? WHERE chat_id = ?", [(verified, email, code, chat_id,),])
         conn.commit()
         conn.close()
         return True
@@ -97,7 +99,7 @@ def show_chats():
     conn.close()
 
 def is_verified(chat_id):
-    res = find_user(chat_id)
+    res = get_user(chat_id)
     conn = sqlite3.connect('test.db')
 
     if(res == None):
@@ -106,12 +108,20 @@ def is_verified(chat_id):
     else:
         return bool(res[2])
 
-def remove_chat(first, second):
+def remove_chat(chat_id):
     conn = sqlite3.connect('test.db')
-    conn.execute("delete from chats where first = (?);", (first,))
-    conn.execute("delete from chats where second = (?);", (second,))
+    conn.execute("delete from chats where first = (?);", (chat_id,))
+    conn.execute("delete from chats where second = (?);", (chat_id,))
     conn.commit()
     conn.close()
+
+def get_chat(chat_id):
+    conn = sqlite3.connect('test.db')
+    rows = conn.execute('SELECT * FROM chats WHERE first=?', (chat_id,))
+    rows = conn.execute('SELECT * FROM chats WHERE second=?', (chat_id,))
+    row = rows.fetchone()
+    conn.close()
+    return row
 
 def create_question(value):
     conn = sqlite3.connect('test.db')
@@ -134,9 +144,8 @@ def get_questions():
     res = []
     while(len(res) != 3):
         elem = randint(1, 6)
-        print(elem)
         rows = conn.execute('SELECT * FROM questions WHERE id=?', (elem,))
         row = rows.fetchone()
         res.append(row)
-    print(res)
     conn.close()
+    return res
