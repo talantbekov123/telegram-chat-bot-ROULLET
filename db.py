@@ -7,6 +7,7 @@ def create_tables():
                 chat_id INTEGER,
                 verified BOOLEAN,
                 code VARCHAR(50),
+                interests VARCHAR(100),
                 email VARCHAR(50)
             );''')
 
@@ -80,8 +81,13 @@ def update_user(chat_id, verified, email, code):
         conn.close();
         return False
     conn.executemany("insert into users (chat_id, verified, email) values (?,?,?);", [(chat_id, verified, email,),])
-    
 
+def update_interest(chat_id, interests):
+    res = get_user(chat_id)
+    conn = sqlite3.connect('test.db')
+    conn.executemany("UPDATE users SET interests = ? WHERE chat_id = ?", [(interests, chat_id,),])
+    conn.commit()
+    conn.close()
 
 def create_chat(first, second):
     conn = sqlite3.connect('test.db')
@@ -189,6 +195,17 @@ def get_from_list():
     conn.execute("delete from list where chat_id = (?);", (row,))
     conn.commit()
     return row
+
+def get_all_from_list():
+    conn = sqlite3.connect('test.db')
+    rows = conn.execute("select * from list")
+    rows = rows.fetchall()
+    axilary = []
+    for row in rows:
+        data = conn.execute("select * from users where chat_id = (?)", (row[1],))
+        data = data.fetchone();
+        axilary.append(data)
+    return axilary
 
 def create_response(value, _from, _to):
     conn = sqlite3.connect('test.db')
