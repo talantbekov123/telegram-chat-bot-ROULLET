@@ -26,11 +26,11 @@ def create_tables():
                 value INT NOT NULL
             );''')
 
-    conn.execute('''CREATE TABLE IF NOT EXISTS responce(
-                id INT PRIMARY KEY NOT NULL,
-                value INT NOT NULL,
-                question_id INT,
-                FOREIGN KEY(question_id) REFERENCES questions(id)
+    conn.execute('''CREATE TABLE IF NOT EXISTS responses(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                _from INT,
+                _to INT,
+                value INT
             );''')
     print("TABLES created successfully");
     conn.close()
@@ -41,7 +41,7 @@ def drop_tables():
     conn.execute("DROP TABLE IF EXISTS list")
     conn.execute("DROP TABLE IF EXISTS chats")
     conn.execute("DROP TABLE IF EXISTS questions")
-    conn.execute("DROP TABLE IF EXISTS responce")
+    conn.execute("DROP TABLE IF EXISTS responses")
     print("ALL TABLES DROPED");
     conn.close()
 
@@ -154,7 +154,7 @@ def show_questions():
     print(rows)
     conn.close()
 
-# returns 10 top questions
+# returns 3 random questions
 def get_questions():
     conn = sqlite3.connect('test.db')
     rows = conn.execute("select count(*) from questions")
@@ -162,9 +162,11 @@ def get_questions():
     res = []
     while(len(res) != 3):
         elem = randint(1, rows_num)
+        if elem in res:
+            continue
         rows = conn.execute('SELECT * FROM questions WHERE id=?', (elem,))
         row = rows.fetchone()
-        res.append(row)
+        res.append(row[1])
     conn.close()
     return res
 
@@ -187,3 +189,9 @@ def get_from_list():
     conn.execute("delete from list where chat_id = (?);", (row,))
     conn.commit()
     return row
+
+def create_response(value, _from, _to):
+    conn = sqlite3.connect('test.db')
+    conn.executemany("insert into responses (value, _from, _to) values (?,?,?);", [(value, _from, _to,),])
+    conn.commit()
+    conn.close()

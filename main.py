@@ -10,6 +10,13 @@ db.create_tables();
 token = "491935642:AAH8bboAvOR4VwInhs0QzCoUPH8hxC7FHSY"
 bot = telebot.TeleBot(token)
 
+'''
+db.create_question("Where do you want to travel?")
+db.create_question("What dish do you like to eat?")
+db.create_question("What subject do you like the most in AUCA?")
+db.create_question("In what department do you study?")
+db.create_question("How old are you?")
+'''
 
 #find @auca in list
 def fn(str):
@@ -48,6 +55,7 @@ def handle_text(message):
                     ln = db.list_len()
                     if(ln == 0):
                         db.add_to_list(chat_id)
+                        db.update_user(chat_id, True, None, "Wait")
                         bot.send_message(chat_id, "Please wait until we find you a company!")
                     else:
                         second_chat_id = db.get_from_list()
@@ -58,6 +66,8 @@ def handle_text(message):
                         db.update_user(second_chat_id, True, None, "Active")
                 else:
                     bot.send_message(chat_id, "Type start, to start chating")
+            elif(curr_user[3] == "Wait"):
+                bot.send_message(chat_id, "Please wait until we find you a company!")
             else:
                 second_chat_id = db.get_chat(chat_id)
                 if(text == "end"):
@@ -67,10 +77,14 @@ def handle_text(message):
                     db.update_user(second_chat_id, True, text, "Pasive")
                     db.remove_chat(chat_id)
                 elif(text == "help"):
-                    bot.send_message(second_chat_id, "Help message!")
+                    values = db.get_questions()
+                    bot.send_message(chat_id, "Some hints, enjoy you company")
+                    for elem in values:
+                        bot.send_message(chat_id, elem)
                 else:
                     bot.send_message(second_chat_id, text)
-                
+                    print("***",chat_id, second_chat_id)
+                    db.create_response(text, chat_id, second_chat_id)
                 
 
 bot.polling(none_stop=False, interval = 0)
