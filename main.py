@@ -5,18 +5,16 @@ import mail
 import re
 
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
-#db.drop_tables()
+db.drop_tables()
 db.create_tables();
 token = "491935642:AAH8bboAvOR4VwInhs0QzCoUPH8hxC7FHSY"
 bot = telebot.TeleBot(token)
 
-'''
 db.create_question("Where do you want to travel?")
 db.create_question("What dish do you like to eat?")
 db.create_question("What subject do you like the most in AUCA?")
 db.create_question("In what department do you study?")
 db.create_question("How old are you?")
-'''
 
 #find @auca in list
 def fn(str):
@@ -24,7 +22,6 @@ def fn(str):
     if(value == "@auca.kg"):
         return True
     return False
-    
 
 @bot.message_handler(content_types=["text"])
 def handle_text(message):
@@ -89,6 +86,8 @@ def handle_text(message):
 
 bot.polling(none_stop=False, interval = 0)
 
+#add slash
+#list and join, create with himself
 
 '''
 
