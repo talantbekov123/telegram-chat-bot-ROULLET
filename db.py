@@ -1,5 +1,7 @@
 import sqlite3
 from random import randint
+import User
+
 def create_tables():
     conn = sqlite3.connect('test.db')
     conn.execute('''CREATE TABLE IF NOT EXISTS users(
@@ -52,7 +54,10 @@ def get_user(chat_id):
     rows = conn.execute('SELECT * FROM users WHERE chat_id=?', (chat_id,))
     row = rows.fetchone()
     conn.close()
-    return row
+    if(row == None):
+        return None
+    curr_user = User.User(row[1], row[2], str(row[3]), str(row[4]), str(row[5]))
+    return curr_user
 
 # if already exists returns false
 def create_user(chat_id, verified, email):
@@ -118,7 +123,7 @@ def is_verified(chat_id):
         conn.close();
         return False
     else:
-        return bool(res[2])
+        return bool(res.verified)
 
 def remove_chat(chat_id):
     conn = sqlite3.connect('test.db')
@@ -188,13 +193,18 @@ def list_len():
     rows_num = rows.fetchone()[0]
     return rows_num
 
-def get_from_list():
+def get_from_list(_id):
     conn = sqlite3.connect('test.db')
     rows = conn.execute("select * from list")
-    row = rows.fetchone()[1]
-    conn.execute("delete from list where chat_id = (?);", (row,))
+    rows = rows.fetchall()
+    print(rows)
+    row = rows[_id]
+    print(row)
+
+    conn.execute("delete from list where chat_id = (?);", (row[1],))
     conn.commit()
-    return row
+    
+    return row[1]
 
 def get_all_from_list():
     conn = sqlite3.connect('test.db')
@@ -212,3 +222,19 @@ def create_response(value, _from, _to):
     conn.executemany("insert into responses (value, _from, _to) values (?,?,?);", [(value, _from, _to,),])
     conn.commit()
     conn.close()
+
+def generate_random_questions():
+    create_question("Where do you want to travel?")
+    create_question("What dish do you like to eat?")
+    create_question("What subject do you like the most in AUCA?")
+    create_question("In what department do you study?")
+    create_question("How old are you?")
+
+def getStatusList():
+    return {
+        'add_interest': '1',
+        'passive': '2',
+        'wait': '3',
+        'active': '4',
+        'select': '5'
+    }
